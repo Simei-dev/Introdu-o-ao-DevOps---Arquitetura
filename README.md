@@ -1,17 +1,20 @@
 # API de Veículos — Aula 3 (REST)
 
-API REST em **.NET 8** que atende exatamente aos exercícios pedidos:
+API REST desenvolvida em **.NET 8** para gerenciamento de veículos e marcas, contemplando os exercícios propostos.
 
-1. CRUD (inserir, editar, excluir, listar, filtrar) de **veículos**
-2. Registro da **quilometragem** do veículo conforme os deslocamentos ocorrem
-3. CRUD (inserir, editar, excluir, listar, filtrar) de **marcas**
-4. No cadastro de veículo, informar a marca validando se está **ativa ou inativa**
+## Funcionalidades
 
-## Tecnologias
+1. CRUD de veículos: cadastrar, editar, excluir, listar e filtrar.
+2. Atualização da quilometragem dos veículos conforme os deslocamentos.
+3. CRUD de marcas: cadastrar, editar, excluir, listar e filtrar.
+4. Validação da marca informada no cadastro e na edição do veículo, permitindo somente marcas ativas.
 
-- ASP.NET Core 8 (Web API / Controllers)
-- Entity Framework Core 8 + SQLite (arquivo `veiculos.db`, criado automaticamente)
-- Swagger (para testar os endpoints pelo navegador)
+## Tecnologias utilizadas
+
+- ASP.NET Core 8 — Web API com Controllers.
+- Entity Framework Core 8 — acesso ao banco de dados.
+- SQLite — banco de dados local (`veiculos.db`).
+- Swagger — documentação e testes dos endpoints.
 
 ## Como executar
 
@@ -21,53 +24,61 @@ dotnet restore
 dotnet run
 ```
 
-O banco SQLite é criado automaticamente ao iniciar, já com 3 marcas de exemplo
-(Volkswagen e Fiat ativas, Chevrolet inativa, para testar a validação do item 4).
-O Swagger abre em `http://localhost:5080/`.
+O banco de dados é configurado na inicialização, com três marcas de exemplo: Volkswagen e Fiat ativas e Chevrolet inativa, permitindo testar a validação de marcas.
+
+O endereço do Swagger depende da porta configurada na aplicação. Se estiver utilizando a porta 5080, acesse `http://localhost:5080/`.
 
 ## Estrutura do projeto
 
-```
+```text
 VeiculosApi/
 ├── Controllers/
-│   ├── MarcasController.cs      # CRUD + filtro de marcas
-│   └── VeiculosController.cs    # CRUD + filtro de veículos + quilometragem
-├── Models/                      # Entidades (Marca, Veiculo)
-├── DTOs/                        # Objetos de entrada/saída da API
-├── Data/AppDbContext.cs         # Contexto do EF Core + seed inicial
-└── Program.cs                   # Configuração da aplicação
+│   ├── MarcasController.cs
+│   └── VeiculosController.cs
+├── Models/
+│   ├── Marca.cs
+│   └── Veiculo.cs
+├── DTOs/
+├── Data/
+│   └── AppDbContext.cs
+└── Program.cs
 ```
 
 ## Endpoints
 
-### Marcas (item 3)
+### 1. Marcas
 
 | Método | Rota | Descrição |
 |---|---|---|
-| GET | `/api/marcas` | Lista marcas |
-| GET | `/api/marcas?nome=fiat&ativo=true` | Filtra por nome e/ou status |
-| GET | `/api/marcas/{id}` | Busca uma marca específica |
-| POST | `/api/marcas` | Cadastra marca |
-| PUT | `/api/marcas/{id}` | Edita marca |
-| DELETE | `/api/marcas/{id}` | Exclui marca |
+| GET | `/api/marcas` | Lista as marcas cadastradas |
+| GET | `/api/marcas?nome=fiat&ativo=true` | Filtra por nome e status |
+| GET | `/api/marcas/{id}` | Busca uma marca pelo ID |
+| POST | `/api/marcas` | Cadastra uma marca |
+| PUT | `/api/marcas/{id}` | Atualiza uma marca |
+| DELETE | `/api/marcas/{id}` | Exclui uma marca |
 
-Corpo (POST/PUT):
+Exemplo de corpo para cadastro ou edição:
+
 ```json
-{ "nome": "Toyota", "ativo": true }
+{
+  "nome": "Toyota",
+  "ativo": true
+}
 ```
 
-### Veículos (itens 1 e 4)
+### 2. Veículos
 
 | Método | Rota | Descrição |
 |---|---|---|
-| GET | `/api/veiculos` | Lista veículos |
-| GET | `/api/veiculos?placa=ABC&modelo=gol&marcaId=1&ano=2020` | Filtra |
-| GET | `/api/veiculos/{id}` | Busca um veículo específico |
-| POST | `/api/veiculos` | Cadastra veículo (valida marca ativa) |
-| PUT | `/api/veiculos/{id}` | Edita veículo (valida marca ativa) |
-| DELETE | `/api/veiculos/{id}` | Exclui veículo |
+| GET | `/api/veiculos` | Lista os veículos cadastrados |
+| GET | `/api/veiculos?placa=ABC&modelo=gol&marcaId=1&ano=2020` | Filtra os veículos |
+| GET | `/api/veiculos/{id}` | Busca um veículo pelo ID |
+| POST | `/api/veiculos` | Cadastra um veículo |
+| PUT | `/api/veiculos/{id}` | Atualiza um veículo |
+| DELETE | `/api/veiculos/{id}` | Exclui um veículo |
 
-Corpo (POST/PUT):
+Exemplo de corpo para cadastro ou edição:
+
 ```json
 {
   "placa": "ABC1D23",
@@ -78,22 +89,28 @@ Corpo (POST/PUT):
 }
 ```
 
-Se `marcaId` apontar para uma marca **inativa**, a API retorna `400 Bad Request`.
+A marca informada deve existir e estar ativa. Caso contrário, a API retorna `400 Bad Request`.
 
-### Quilometragem (item 2)
+### 3. Atualização da quilometragem
 
 | Método | Rota | Descrição |
 |---|---|---|
-| POST | `/api/veiculos/{id}/quilometragem` | Informa a nova quilometragem do veículo |
+| POST | `/api/veiculos/{id}/quilometragem` | Atualiza a quilometragem do veículo |
 
-Corpo:
+Exemplo de corpo da requisição:
+
 ```json
-{ "novaQuilometragem": 15230.5 }
+{
+  "novaQuilometragem": 15230.5
+}
 ```
+
+A quilometragem informada representa o novo valor atual do veículo.
 
 ## Observações
 
-- Versão enxuta: sem validações ou funcionalidades além do enunciado (sem histórico de
-  quilometragem, sem bloqueio de exclusão, sem checagem de duplicidade de placa/nome).
-- Não foi possível compilar/executar o projeto neste ambiente (sem acesso ao NuGet). Recomendo
-  rodar `dotnet build` no seu ambiente antes de entregar, para garantir que compila sem erros.
+- O projeto mantém uma implementação simples, focada nos requisitos da aula.
+- Não possui histórico de quilometragem nem validação de duplicidade de placas ou nomes.
+- A exclusão não possui bloqueios adicionais relacionados a outras entidades.
+- Antes da entrega, execute `dotnet build` para verificar se o projeto compila corretamente.
+- Caso necessário, confira a configuração da porta e a criação inicial do banco de dados.
